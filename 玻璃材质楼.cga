@@ -1,0 +1,98 @@
+/**
+ * File:    玻璃材质楼.cga
+ * Created: 27 Apr 2020 12:18:49 GMT
+ * Author:  李上言
+ */
+
+version "2019.1"
+
+
+#属性参数定义
+
+attr Floor=10
+
+attr Floor_Height=3
+
+attr Groundfloor_Height=4
+
+attr HighBuilding_Color="#6892d7"
+
+
+#变量定义
+
+Building_Height=Floor*Floor_Height
+
+const Tile_Width=1.8
+
+const FloorTop_Hight=0.1
+
+const Frame_Width=0.08
+
+
+@StartRule
+
+
+#生成建筑结构
+
+Lot-->
+
+	 extrude(Building_Height)
+
+	HighBuilding
+
+
+#切分出第一层和上面楼层
+
+HighBuilding-->
+
+	split(y){Groundfloor_Height:FloorVolume1|{~Floor_Height:FloorVolume}*}
+
+#拆分出每个楼层的地面和侧面
+FloorVolume1-->
+	s('1.1,'1.2,'3)
+	//center(z)
+FloorVolume-->
+		//s('1.1,'1.2,'3)
+	 comp(f) {top : offset(-0.1, inside) FloorTop|side:FloorSides}
+
+
+#楼层地面填充颜色
+
+FloorTop --> 
+	color(0.5,0.5,0.5)
+
+
+#侧面生成玻璃窗户
+
+FloorSides -->
+
+	split(x) {~Tile_Width : FloorTile }*
+
+
+FloorTile -->
+
+	offset(-Frame_Width/2)
+
+	comp(f) {border : color(0.2,0.2,0.2) Frame. | inside : Glass}
+
+#制作玻璃反光效果
+
+Glass -->
+
+	color(HighBuilding_Color)
+	
+	set(material.opacity, 0.4)
+	
+	 #镜面反射
+	
+	 set(material.specular.r,0.6)
+	
+	 set(material.specular.g,0.6)
+	
+	set(material.specular.b,0.6)
+	
+	set(material.shininess,50)
+	
+	 #反射率
+	
+	set(material.reflectivity, 0.2)

@@ -1,0 +1,42 @@
+/**
+ * File:    屋顶.cga
+ * Created: 10 Apr 2020 16:59:27 GMT
+ * Author:  李上言
+ */
+
+version "2019.1"
+
+
+
+Lot-->
+    setback(3)   //定义街道边包裹建筑
+        { streetSide: OpenSpace 
+        | remainder: SubParcel }
+
+SubParcel -->       //街道边完了剩余边
+    setback(3/2)
+        { noStreetSide: OpenSpace  
+        | remainder: Footprint }   
+Footprint --> extrude(40)   Building  //拉box   
+OpenSpace --> color("#77ff77")   //给街道边颜色
+	
+Building-->
+	comp(f) { top : Top  |
+			 // front :  Fontfacade  | 
+			 // back  :  Backfacade  |
+			  side  :  Sidefacade  
+			  }
+# Roofs李上言的屋顶
+Top --> 
+      offset(1)//负号向上生成屋檐
+      
+      comp(f){ border : RoofEdge | inside : RoofFlat }     
+RoofFlat -->
+      extrude(0.5)
+      setupProjection(0, scope.xy, '1, '1)
+      projectUV(0) 
+      texture("flatroof6.bw.jpg")     
+RoofEdge --> 
+		
+      extrude(-1)
+      color("#77ff77")

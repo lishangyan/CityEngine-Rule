@@ -1,0 +1,49 @@
+/**
+ * File:    ¼òµ¥Â¥5.cga
+ * Created: 13 Apr 2020 20:06:55 GMT
+ * Author:  ÀîÉÏÑÔ
+ */
+
+version "2019.1"
+attr  lou_height  = 50
+attr  roof_angle  = 30
+attr  bar_hight   = lou_height-3
+@StartRule
+
+
+Lot-->
+	extrude(lou_height)
+	comp(f) {  front: frontfacade |
+				back: backfacade  | 
+				left: leftfacade  | 
+				right: rightfacade |
+				top: roof }
+frontfacade	-->
+	split(y) {~10:dizuo| {6 : louceng }*| 2:tiao2}	
+dizuo-->
+	extrude(1)
+louceng-->
+	offset(-1)
+	comp(f) { border : RoofEdge | inside : RoofFlat }
+	
+RoofEdge-->
+	extrude(1)
+
+RoofFlat-->
+	extrude(-2)
+	split(x){{~4 : win | 0.2:NIL }*| ~4 : win2}
+#####################wuding############################
+roof-->
+	offset(1.5,inside)
+	extrude(0.75)
+		A
+A-->
+	[ comp(f) { top : roof0| side : side }]
+	[ comp(f) { top : roof1 }]
+roof1-->
+	split(x) { '0.6:NIL | 8 : roofblock }*
+roofblock-->
+	color(1,0,0)
+	split(y) { '0.7:NIL | 7 : roofblock1 }*
+roofblock1-->
+	extrude(1)	

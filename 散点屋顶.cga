@@ -1,0 +1,92 @@
+/**
+ * File:    屋顶.cga
+ * Created: 10 Apr 2020 16:59:27 GMT
+ * Author:  李上言
+ */
+
+version "2019.1"
+
+attr floorNumber = -1
+
+const floorHeight = 4
+
+Lot-->
+    setback(3)   //定义街道边包裹建筑
+        { streetSide: OpenSpace 
+        | remainder: SubParcel }
+
+SubParcel -->       //街道边完了剩余边
+    setback(1.5)
+        { noStreetSide: OpenSpace  
+        | remainder: Building0 }   
+Building0 --> extrude(40)   Building  //拉box   
+OpenSpace --> color("#77ff77")   //给街道边颜色
+	
+Building-->
+	comp(f) { top : Top  |
+			 // front :  Fontfacade  | 
+			 // back  :  Backfacade  |
+			  side  :  Sidefacade  
+			  }
+# Roofs李上言的屋顶
+Top --> 
+      offset(1)//负号向上生成屋檐
+      
+      comp(f){ border : RoofEdge | inside : RoofFlat1 }     
+RoofFlat1 -->
+	RoofFlat_satter
+	RoofFlat
+RoofFlat_satter-->
+	offset(-5)
+	scatter(surface, 2, gaussian) { topcube }
+topcube-->
+	primitiveCube(5, 3, 4)
+RoofFlat-->	
+      extrude(0.5)
+      setupProjection(0, scope.xy, '1, '1)
+      projectUV(0) 
+      texture("flatroof6.bw.jpg")     
+RoofEdge --> 
+		
+      extrude(-1)
+      //color("#77ff77")
+      
+#################下面的是楼################
+      
+Sidefacade-->
+	split(y) { ~floorHeight: Floor }*
+   
+Floor-->
+   set(floorNumber, split.index)
+   split(x) { ~1   : Wall 
+            | {~3  : Tile }* 
+            | ~1   : Wall } 
+Tile-->
+   split(x) { 0.5  : Wall 
+            | ~1   : MidTile 
+            | 0.5  : Wall }
+MidTile-->
+   split(y) { 0.5  : Wall 
+            | ~1   : Window 
+            | 0.5  : Wall }
+			
+Window-->
+   case floorNumber % 3 == 0:
+        //color(0.0, 1.0, 1.0,0.5)
+        //color("#6892d7")
+        color(0.0, 0.0, 1.0)
+		set(material.opacity, 0.4)
+
+		#镜面反射
+
+		set(material.specular.r,0.6)
+		set(material.specular.g,0.6)
+		set(material.specular.b,0.6)
+		set(material.shininess,50)
+			
+ 		#反射率
+
+		set(material.reflectivity, 0.2)
+        X
+   else:
+        X

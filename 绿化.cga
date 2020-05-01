@@ -1,0 +1,42 @@
+/**
+ * File:    绿化.cga
+ * Created: 29 Apr 2020 02:50:54 GMT
+ * Author:  李上言
+ */
+
+version "2019.1"
+
+attr floorNumber = -1
+
+const floorHeight = 4
+
+Lot-->
+	30%:plantree
+	else: shapeL(5,3) { shape : plantree 
+	| remainder : parcel }
+
+plantree-->
+	scatter(scope, 20, uniform) { tree }
+tree-->
+	20%:i("/mu2018/assets/cyl.obj")
+	20%:NIL
+	else:NIL
+
+parcel-->
+    setback(3)   //定义街道边包裹建筑
+        { streetSide: OpenSpace 
+        | remainder: SubParcel }
+
+SubParcel -->       //街道边完了剩余边
+    setback(1.5)
+        { noStreetSide: OpenSpace  
+        | remainder: Building0 }   
+Building0 --> extrude(40)   Building  //拉box   
+OpenSpace --> color("#77ff77")   //给街道边颜色
+	
+Building-->
+	comp(f) { top : Top  |
+			 // front :  Fontfacade  | 
+			 // back  :  Backfacade  |
+			  side  :  Sidefacade  
+			  }

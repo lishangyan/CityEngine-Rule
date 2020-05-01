@@ -1,0 +1,33 @@
+/**
+ * File:    简单楼3.cga
+ * Created: 13 Apr 2020 11:41:35 GMT
+ * Author:  李上言
+ */
+
+version "2019.1"
+
+
+
+
+attr  lou_height  = 100
+attr  roof_angle  = 30
+attr  bar_hight   = lou_height-3
+@StartRule
+
+Lot-->
+	A 
+	extrude(lou_height)
+	B
+B-->	
+	split(y) {10:dizuo| {8 : louceng | 2 : tiao}*| ~1:tiao2}
+louceng-->
+	//s('0.8,'0.8,'1)
+	NIL
+A-->
+	offset(-1, inside)
+	extrude(lou_height)
+	
+	
+//方法二
+
+

@@ -1,0 +1,53 @@
+/**
+ * File:    简单楼2.cga
+ * Created: 12 Apr 2020 16:13:35 GMT
+ * Author:  李上言
+ */
+
+version "2019.1"
+
+
+
+attr  lou_height  = 50
+attr  roof_angle  = 30
+attr  bar_hight   = lou_height-3
+@StartRule
+
+Lot-->
+	extrude(lou_height)
+	comp(f) {  front: frontfacade |
+				back: backfacade  | 
+				left: leftfacade  | 
+				right: rightfacade  | 
+				top : rooffacade}
+
+
+###################屋顶###################	
+rooffacade-->
+
+	offset(-2)
+	comp(f){ border : RoofEdge | inside : RoofFlat }
+RoofEdge-->
+	extrude(world.up, 1.5)
+RoofFlat-->
+	[ extrude(0.5)
+	comp(f) { top : roof0 }]
+	[ extrude(0.5)
+	comp(f) { top : roof1 }]
+roof1-->
+	split(x) { '0.6:NIL | 8 : roofblock }*
+roofblock-->
+	color(1,0,0)
+	split(y) { '0.7:NIL | 7 : roofblock1 }*
+roofblock1-->
+	extrude(1)	
+//roofblock1-->
+###################正面###################
+
+frontfacade-->
+	split(x) {{ ~3 : wall | 3 : bar}*| ~3:wall}
+bar-->
+	split(y) { bar_hight : bar1 | 3 : wall }
+	
+bar1-->
+	color(0,0,1)
