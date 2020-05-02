@@ -1,0 +1,196 @@
+/**
+ * File:    复杂楼3.cga
+ * Created: 25 Apr 2020 18:11:40 GMT
+ * Author:  李上言
+ */
+
+version "2019.1"
+
+@Group("楼层高度") 
+
+@Order(1) @Range(min=28, max=150,restricted=false) @Distance
+attr height = Groundfloor_Height*2+Floor*Floor_Height+RoofHeight
+@Order(2)@Range(min=1, max=30,restricted=false) @Distance
+attr Floor=10
+
+@Group("底层")
+
+@Order(1) @Range(min=1, max=20,restricted=false)
+attr Groundfloor_Height=10
+@Order(2)
+attr Win_Width_Ground=1.8*7
+@Order(3) @Range(min=0,max=3,restricted=false) @Distance
+attr Frame_Width=0.11  # 调边框粗细
+
+@Group("上层",5)
+
+@Order(1) @Range(min=0,max=10,restricted=false) @Distance
+attr Floor_Height=6
+@Order(2) @Range(min=0,max=10,restricted=false) @Distance
+attr Win_Width=1.8
+@Order(3) @Range(min=0,max=1,restricted=false) @Distance
+attr Win_height=0.7
+@Order(4) @Range(min=0,max=1,restricted=false) @Distance
+attr decorate_height=0.15
+attr HighBuilding_Color="#6892d7"
+
+@Group("楼顶",2)
+
+@Order(1) @Range(min=0,max=10,restricted=false) @Distance
+attr RoofHeight=5
+@Order(2) @Range(min=0,max=10,restricted=false) @Distance
+attr Numcube=2
+
+@Group("内部结构",2)
+@Order(1) @Range(min=0,max=10,restricted=false) @Distance
+attr barwide=1
+@Order(2) @Range(min=0,max=10,restricted=false) @Distance
+attr barspace=3
+*Win_Width
+#变量定义
+
+Building_Height=Floor*Floor_Height
+
+
+
+const FloorTop_Hight=0.1
+
+
+
+
+Lot-->
+	
+	[ extrude(height)
+	A]
+	[offset(-0.1,inside) 
+	extrude(height)
+	B]
+	[offset(-3,inside) 
+	extrude(height)
+	C]
+	[offset(-0.1,inside) 
+	extrude(height)
+	D]
+A-->
+	split(y) { Groundfloor_Height : ground_foor | Groundfloor_Height : ground_foor| {Floor_Height:FloorVolume}*| RoofHeight:tiao3}
+
+################底座#####################
+
+ground_foor-->
+	 comp(f) {side:ground_Sides}
+ground_Sides-->
+	split(x) {~Win_Width_Ground : GFloorTile }*
+
+
+GFloorTile -->
+	split(x) {'0.3: GFloorTile1| '0.4: GFloorTile1| '0.3:GFloorTile1}
+GFloorTile1-->
+	split(y) {'0.37: GFloorTile2| '0.63: GFloorTile2}
+GFloorTile2-->
+	offset(-Frame_Width)
+
+	comp(f) {border : color(0.2,0.2,0.2) Frame | inside : Glass}
+Frame-->
+	i("primitives/cylinder.hor.obj")
+	s('1,'1,'1)
+################上面楼层#####################	 
+
+#拆分出上面每个楼层的地面和侧面
+
+FloorVolume-->
+		
+	 comp(f) {top : offset(-0.1, inside) FloorTop| side:FloorSides}
+
+
+#楼层地面填充颜色
+
+FloorTop --> 
+	color(0.5,0.5,0.5)
+
+
+#侧面生成玻璃窗户
+
+FloorSides -->
+
+	split(x) {~Win_Width : FloorTile }*
+
+
+FloorTile -->
+	split(y) {'decorate_height : ceng | 'Win_height:FloorTile2 | 'decorate_height : ceng }
+FloorTile2-->
+	offset(-Frame_Width)
+
+	comp(f) {border : color(0.2,0.2,0.2) Frame. | inside : Glass}
+ceng-->
+	offset(-Frame_Width)
+
+	comp(f) {border : color(0.2,0.2,0.2) Frame. | inside : Glass2}
+Glass2-->
+	color(0.5,0.5,0.5,0.7)
+#制作玻璃反光效果
+
+Glass -->
+
+	color(HighBuilding_Color)
+	
+	set(material.opacity, 0.4)
+	
+	 #镜面反射
+	
+	 set(material.specular.r,0.6)
+	
+	 set(material.specular.g,0.6)
+	
+	set(material.specular.b,0.6)
+	
+	set(material.shininess,50)
+	
+	 #反射率
+	
+	set(material.reflectivity, 0.2)
+
+################楼的横层#####################
+	
+B-->
+	split(y) {0.1:dizuo | 9:NIL| 1.5:dizuo | 8.5:NIL| {0.5 : tiao|5 : louceng | 0.5 : tiao}*| ~1:tiao2}
+louceng-->
+	NIL
+C-->
+	color(1,1,1,0.5)
+D-->	
+	color(1,1,1,0.7)
+	split(x) {{barwide:  tiao11 | ~barspace:NIL}*|   barwide:tiao11}
+tiao11-->
+	split(z) {{barwide:  tiao22 | ~barspace:NIL}*|   barwide:tiao22}
+	
+################屋顶#####################
+
+tiao3-->
+	comp(f) { top : roof  | side : side11}
+roof-->
+	offset(-1.5)//负号向上生成屋檐
+     
+      comp(f){ border : RoofEdge | inside : RoofFlat1 }     
+RoofFlat1 -->
+	//extrude(6)
+	RoofFlat_satter
+	RoofFlat
+RoofFlat_satter-->
+	offset(-5, inside)
+	scatter(surface, Numcube, gaussian) { topcube }
+topcube-->
+	primitiveCube(5, 3, 4) 
+RoofFlat-->	
+      extrude(0.5)
+      //setupProjection(0, scope.xy, '1, '1)
+      //projectUV(0) 
+      //texture("flatroof6.bw.jpg")     
+RoofEdge --> 
+		
+      extrude(4)
+      side11
+      //color("#77ff77")
+side11-->
+	setupProjection(0, scope.xy, 40,20,10,10)
+	texture("@]L2[E_IK54I6TA%2A}BZX5.png")
+ 	projectUV(0)
